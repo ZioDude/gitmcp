@@ -9,7 +9,7 @@ interface TypingAnimationProps extends Omit<MotionProps, 'children'> {
   className?: string;
   duration?: number;
   delay?: number;
-  as?: ElementType;
+  as?: ElementType; // e.g., 'div', 'p', 'h1', etc.
   startOnView?: boolean;
 }
 
@@ -18,15 +18,13 @@ export function TypingAnimation({
   className,
   duration = 50,
   delay = 0,
-  as: Component = "div",
+  as: AsComponent = "div",
   startOnView = false,
-  ...props
+  ...props // These are the MotionProps (excluding children)
 }: TypingAnimationProps): ReactElement {
-  const MotionComponent = motion[Component as keyof typeof motion] || motion.div;
-
   const [displayedText, setDisplayedText] = useState<string>("");
   const [started, setStarted] = useState(!startOnView);
-  const elementRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLElement>(null); // Generic HTMLElement for the ref
 
   useEffect(() => {
     if (startOnView) {
@@ -43,10 +41,15 @@ export function TypingAnimation({
         { threshold: 0.1 },
       );
 
-      if (elementRef.current) {
-        observer.observe(elementRef.current);
+      const currentElement = elementRef.current;
+      if (currentElement) {
+        observer.observe(currentElement);
       }
-      return () => observer.disconnect();
+      return () => {
+        if (currentElement) {
+          observer.unobserve(currentElement);
+        }
+      };
     } else {
         const startTimeout = setTimeout(() => {
             setStarted(true);
@@ -74,17 +77,23 @@ export function TypingAnimation({
     };
   }, [text, duration, started]);
 
+  // Dynamically select the motion component based on AsComponent
+  // Fallback to motion.div if AsComponent is not a string or a recognized HTML tag string
+  const MotionAsComponent =
+    typeof AsComponent === "string" && (motion as any)[AsComponent]
+      ? (motion as any)[AsComponent]
+      : motion.div;
+
   return (
-    <MotionComponent
-      ref={elementRef}
-      className={cn(
-        className,
-      )}
-      {...props}
+    <MotionAsComponent
+      ref={elementRef} 
+      className={cn(className)} // Apply Tailwind classes
+      {...props} // Spread the rest of the MotionProps
     >
       {displayedText}
-      <span style={{ visibility: 'hidden', position: 'absolute', pointerEvents: 'none' }}>{text}</span>
-    </MotionComponent>
+      {/* Invisible text for layout calculation - helps prevent layout shifts as text types out */}
+      <span style={{ visibility: 'hidden', position: 'absolute', top: '-9999px', left: '-9999px' }}>{text}</span>
+    </MotionAsComponent>
   );
 }
 
