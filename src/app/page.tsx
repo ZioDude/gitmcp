@@ -101,7 +101,6 @@ export default function HomePage() {
         numSquares={50}
         maxOpacity={0.1}
         duration={3}
-        repeatDelay={1}
         className={cn(
           "[mask-image:radial-gradient(ellipse_at_center,white,transparent_70%)]",
           "inset-0 h-full w-full",
@@ -165,7 +164,7 @@ export default function HomePage() {
           <h2 className="text-4xl font-bold mb-6 text-purple-300">About LeadGen Magic</h2>
           <TypingAnimation
             className="text-xl text-purple-400/90 leading-relaxed max-w-3xl mx-auto"
-            text="We are a team of passionate marketers and tech wizards dedicated to transforming your lead generation. With years of experience and a sprinkle of magic, we craft strategies that deliver real, measurable results. Our mission is to empower businesses like yours to connect with their ideal customers and achieve unprecedented growth."
+            text="We are a team of passionate marketers and tech wizards dedicated to transforming your lead generation. With years of experience and a sprinkle of magic, we craft strategies that deliver real, measurable results. Our mission is to empower businesses like your business to connect with their ideal customers and achieve unprecedented growth."
           />
         </section>
 

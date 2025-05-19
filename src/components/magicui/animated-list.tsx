@@ -68,7 +68,6 @@ const AnimatedList = React.forwardRef<HTMLDivElement, AnimatedListProps>(
             }
         }
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startOnView, combinedRef, delay]);
 
     const animations = {
