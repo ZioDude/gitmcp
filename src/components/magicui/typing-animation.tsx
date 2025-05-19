@@ -80,8 +80,9 @@ export function TypingAnimation({
   // Dynamically select the motion component based on AsComponent
   // Fallback to motion.div if AsComponent is not a string or a recognized HTML tag string
   const MotionAsComponent =
-    typeof AsComponent === "string" && (motion as any)[AsComponent]
-      ? (motion as any)[AsComponent]
+    typeof AsComponent === "string" && 
+    Object.prototype.hasOwnProperty.call(motion, AsComponent) // Check if AsComponent is a key of motion
+      ? motion[AsComponent as keyof typeof motion] // Type assertion if AsComponent is a valid key
       : motion.div;
 
   return (
