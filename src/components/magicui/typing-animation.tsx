@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { motion, MotionProps } from "motion/react";
 import { useEffect, useRef, useState, ReactElement, ElementType } from "react";
 
-interface TypingAnimationProps extends Omit<MotionProps, 'children'> {
+interface TypingAnimationProps extends Omit<MotionProps, 'children' | 'as'> {
   text: string;
   className?: string;
   duration?: number;
@@ -20,7 +20,7 @@ export function TypingAnimation({
   delay = 0,
   as: AsComponent = "div",
   startOnView = false,
-  ...props // These are the MotionProps (excluding children)
+  ...props // These are the MotionProps (excluding children and 'as')
 }: TypingAnimationProps): ReactElement {
   const [displayedText, setDisplayedText] = useState<string>("");
   const [started, setStarted] = useState(!startOnView);
@@ -87,7 +87,7 @@ export function TypingAnimation({
 
   return (
     <MotionAsComponent
-      ref={elementRef} 
+      ref={elementRef as any}
       className={cn(className)} // Apply Tailwind classes
       {...props} // Spread the rest of the MotionProps
     >
