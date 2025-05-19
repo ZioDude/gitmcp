@@ -227,7 +227,7 @@ export default function HomePage() {
         <section id="contact" className="w-full max-w-2xl py-16 md:py-24">
           <h2 className="text-4xl font-bold text-center mb-4 text-purple-300">Get In Touch</h2>
           <p className="text-lg text-center text-purple-400/80 mb-12 max-w-xl mx-auto">
-            Ready to experience the magic? Fill out the form below and let's discuss your project.
+            Ready to experience the magic? Fill out the form below and let&apos;s discuss your project.
           </p>
           <form className="space-y-6 bg-black/40 border border-purple-700/50 p-8 rounded-lg shadow-xl backdrop-blur-sm">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
