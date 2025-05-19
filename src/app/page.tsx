@@ -1,4 +1,3 @@
-import Image from "next/image";
 import WordRotate from "@/components/magicui/word-rotate";
 import { Button } from "@/components/ui/button";
 import AnimatedGridPattern from "@/components/magicui/animated-grid-pattern";

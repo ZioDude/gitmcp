@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react"; // Assuming motion/react is used, adjust if framer-motion
 
@@ -20,7 +20,7 @@ interface AnimatedListProps {
   initial?: object;
   animate?: object;
   exit?: object;
-  onAnimationComplete?: (definition: any) => void;
+  onAnimationComplete?: () => void;
   startOnView?: boolean;
 }
 
@@ -48,22 +48,27 @@ const AnimatedList = React.forwardRef<HTMLDivElement, AnimatedListProps>(
 
     useEffect(() => {
       if (startOnView) {
-        const currentRef = (combinedRef as React.RefObject<HTMLDivElement>)?.current;
-        if (!currentRef) return;
+        const currentReff = (combinedRef as React.RefObject<HTMLDivElement>)?.current;
+        if (!currentReff) return;
 
         const observer = new IntersectionObserver(
           ([entry]) => {
             if (entry.isIntersecting) {
               setIsVisible(true);
-              observer.unobserve(currentRef);
+              observer.unobserve(currentReff);
             }
           },
           { threshold: 0.1 }
         );
 
-        observer.observe(currentRef);
-        return () => observer.unobserve(currentRef);
+        observer.observe(currentReff);
+        return () => {
+            if (currentReff) {
+                observer.unobserve(currentReff);
+            }
+        }
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startOnView, combinedRef, delay]);
 
     const animations = {

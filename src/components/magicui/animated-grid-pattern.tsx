@@ -17,11 +17,10 @@ export interface AnimatedGridPatternProps
   height?: number;
   x?: number;
   y?: number;
-  strokeDasharray?: any;
+  strokeDasharray?: string | number;
   numSquares?: number;
   maxOpacity?: number;
   duration?: number;
-  repeatDelay?: number;
 }
 
 export function AnimatedGridPattern({
@@ -34,21 +33,16 @@ export function AnimatedGridPattern({
   className,
   maxOpacity = 0.5,
   duration = 4,
-  repeatDelay = 0.5, // This prop seems to be defined but not used in the provided code. Will keep it for now.
   ...props
 }: AnimatedGridPatternProps) {
   const id = useId();
-  const containerRef = useRef<SVGSVGElement>(null); // Added type for useRef
+  const containerRef = useRef<SVGSVGElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   
-  // Memoize generateSquares function if it doesn't depend on frequently changing props not listed in its dependencies
-  // For now, assuming it's fine as is, but consider for optimization if performance issues arise.
   const generateSquares = (count: number) => {
-    // Ensure getPos is defined or imported if it's from elsewhere, or define it locally.
-    // For now, defining a simple getPos, adjust if it needs access to dimensions directly before set.
     const getPos = () => [
-      Math.floor((Math.random() * (dimensions.width || width * 10)) / width), // Fallback for initial render
-      Math.floor((Math.random() * (dimensions.height || height * 10)) / height), // Fallback for initial render
+      Math.floor((Math.random() * (dimensions.width || width * 10)) / width),
+      Math.floor((Math.random() * (dimensions.height || height * 10)) / height),
     ];
     return Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -58,8 +52,7 @@ export function AnimatedGridPattern({
 
   const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
-  // Function to update a single square's position
-  const updateSquarePosition = (squareId: number) => { // Changed id to squareId to avoid conflict with useId
+  const updateSquarePosition = (squareId: number) => {
     const getPos = () => [
         Math.floor((Math.random() * dimensions.width) / width),
         Math.floor((Math.random() * dimensions.height) / height),
@@ -76,18 +69,17 @@ export function AnimatedGridPattern({
     );
   };
 
-  // Update squares to animate in
   useEffect(() => {
     if (dimensions.width && dimensions.height) {
       setSquares(generateSquares(numSquares));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dimensions, numSquares]); // Removed generateSquares from deps as it's redefined inside or should be memoized
+  }, [dimensions, numSquares]);
 
-  // Resize observer to update container dimensions
   useEffect(() => {
+    const currentRef = containerRef.current;
     const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setDimensions({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
@@ -95,16 +87,16 @@ export function AnimatedGridPattern({
       }
     });
 
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+    if (currentRef) {
+      resizeObserver.observe(currentRef);
     }
 
     return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
+      if (currentRef) {
+        resizeObserver.unobserve(currentRef);
       }
     };
-  }, [containerRef]);
+  }, []);
 
   return (
     <svg
@@ -134,18 +126,18 @@ export function AnimatedGridPattern({
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [sqX, sqY], id: squareId }, index) => ( // Renamed x,y in destructuring to avoid conflict
+        {squares.map(({ pos: [sqX, sqY], id: squareId }, index) => (
           <motion.rect
             initial={{ opacity: 0 }}
             animate={{ opacity: maxOpacity }}
             transition={{
               duration,
-              repeat: 1, // Ensures it animates out as well
-              delay: index * 0.1, // Stagger animation
+              repeat: 1,
+              delay: index * 0.1,
               repeatType: "reverse",
             }}
-            onAnimationComplete={() => updateSquarePosition(squareId)} // Pass the correct id
-            key={`${sqX}-${sqY}-${index}-${squareId}`} // Ensure key is unique
+            onAnimationComplete={() => updateSquarePosition(squareId)}
+            key={`${sqX}-${sqY}-${index}-${squareId}`}
             width={width - 1}
             height={height - 1}
             x={sqX * width + 1}
@@ -159,4 +151,4 @@ export function AnimatedGridPattern({
   );
 }
 
-export default AnimatedGridPattern; // Added default export 
+export default AnimatedGridPattern; 
