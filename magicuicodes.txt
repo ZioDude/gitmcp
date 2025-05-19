@@ -1,0 +1,303 @@
+Please paste the source code for BentoGrid and BentoCard here from:
+https://magicui.design/docs/components/bento-grid (Manual tab)
+
+```tsx
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { ComponentPropsWithoutRef, ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
+  children: ReactNode;
+  className?: string;
+}
+
+interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
+  name: string;
+  className: string;
+  background: ReactNode;
+  Icon: React.ElementType;
+  description: string;
+  href: string;
+  cta: string;
+}
+
+const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
+  return (
+    <div
+      className={cn(
+        "grid w-full auto-rows-[22rem] grid-cols-3 gap-4",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+const BentoCard = ({
+  name,
+  className,
+  background,
+  Icon,
+  description,
+  href,
+  cta,
+  ...props
+}: BentoCardProps) => (
+  <div
+    key={name}
+    className={cn(
+      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+      // light styles
+      "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+      // dark styles
+      "transform-gpu dark:bg-background dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+      className,
+    )}
+    {...props}
+  >
+    <div>{background}</div>
+    <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-6 transition-all duration-300 group-hover:-translate-y-10">
+      <Icon className="h-12 w-12 origin-left transform-gpu text-neutral-700 transition-all duration-300 ease-in-out group-hover:scale-75" />
+      <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
+        {name}
+      </h3>
+      <p className="max-w-lg text-neutral-400">{description}</p>
+    </div>
+
+    <div
+      className={cn(
+        "pointer-events-none absolute bottom-0 flex w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100",
+      )}
+    >
+      <Button variant="ghost" asChild size="sm" className="pointer-events-auto">
+        <a href={href}>
+          {cta}
+          <ArrowRightIcon className="ms-2 h-4 w-4 rtl:rotate-180" />
+        </a>
+      </Button>
+    </div>
+    <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-black/[.03] group-hover:dark:bg-neutral-800/10" />
+  </div>
+);
+
+export { BentoCard, BentoGrid };
+
+```
+
+---
+
+Please paste the source code for TypingAnimation here from:
+https://magicui.design/docs/components/typing-animation (Manual tab)
+
+```tsx
+"use client";
+
+import { cn } from "@/lib/utils";
+import { motion, MotionProps } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+
+interface TypingAnimationProps extends MotionProps {
+  children: string;
+  className?: string;
+  duration?: number;
+  delay?: number;
+  as?: React.ElementType;
+  startOnView?: boolean;
+}
+
+export function TypingAnimation({
+  children,
+  className,
+  duration = 100,
+  delay = 0,
+  as: Component = "div",
+  startOnView = false,
+  ...props
+}: TypingAnimationProps) {
+  const MotionComponent = motion.create(Component, {
+    forwardMotionProps: true,
+  });
+
+  const [displayedText, setDisplayedText] = useState<string>("");
+  const [started, setStarted] = useState(false);
+  const elementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!startOnView) {
+      const startTimeout = setTimeout(() => {
+        setStarted(true);
+      }, delay);
+      return () => clearTimeout(startTimeout);
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setStarted(true);
+          }, delay);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay, startOnView]);
+
+  useEffect(() => {
+    if (!started) return;
+
+    let i = 0;
+    const typingEffect = setInterval(() => {
+      if (i < children.length) {
+        setDisplayedText(children.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(typingEffect);
+      }
+    }, duration);
+
+    return () => {
+      clearInterval(typingEffect);
+    };
+  }, [children, duration, started]);
+
+  return (
+    <MotionComponent
+      ref={elementRef}
+      className={cn(
+        "text-4xl font-bold leading-[5rem] tracking-[-0.02em]",
+        className,
+      )}
+      {...props}
+    >
+      {displayedText}
+    </MotionComponent>
+  );
+}
+
+```
+
+---
+
+Please paste the source code for AnimatedList here from:
+https://magicui.design/docs/components/animated-list (Manual tab)
+
+```tsx
+"use client";
+
+import { cn } from "@/lib/utils";
+import { AnimatedList } from "@/registry/magicui/animated-list";
+
+interface Item {
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  time: string;
+}
+
+let notifications = [
+  {
+    name: "Payment received",
+    description: "Magic UI",
+    time: "15m ago",
+
+    icon: "💸",
+    color: "#00C9A7",
+  },
+  {
+    name: "User signed up",
+    description: "Magic UI",
+    time: "10m ago",
+    icon: "👤",
+    color: "#FFB800",
+  },
+  {
+    name: "New message",
+    description: "Magic UI",
+    time: "5m ago",
+    icon: "💬",
+    color: "#FF3D71",
+  },
+  {
+    name: "New event",
+    description: "Magic UI",
+    time: "2m ago",
+    icon: "🗞️",
+    color: "#1E86FF",
+  },
+];
+
+notifications = Array.from({ length: 10 }, () => notifications).flat();
+
+const Notification = ({ name, description, icon, color, time }: Item) => {
+  return (
+    <figure
+      className={cn(
+        "relative mx-auto min-h-fit w-full max-w-[400px] cursor-pointer overflow-hidden rounded-2xl p-4",
+        // animation styles
+        "transition-all duration-200 ease-in-out hover:scale-[103%]",
+        // light styles
+        "bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+        // dark styles
+        "transform-gpu dark:bg-transparent dark:backdrop-blur-md dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+      )}
+    >
+      <div className="flex flex-row items-center gap-3">
+        <div
+          className="flex size-10 items-center justify-center rounded-2xl"
+          style={{
+            backgroundColor: color,
+          }}
+        >
+          <span className="text-lg">{icon}</span>
+        </div>
+        <div className="flex flex-col overflow-hidden">
+          <figcaption className="flex flex-row items-center whitespace-pre text-lg font-medium dark:text-white ">
+            <span className="text-sm sm:text-lg">{name}</span>
+            <span className="mx-1">·</span>
+            <span className="text-xs text-gray-500">{time}</span>
+          </figcaption>
+          <p className="text-sm font-normal dark:text-white/60">
+            {description}
+          </p>
+        </div>
+      </div>
+    </figure>
+  );
+};
+
+export function AnimatedListDemo({
+  className,
+}: {
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex h-[500px] w-full flex-col overflow-hidden p-2",
+        className,
+      )}
+    >
+      <AnimatedList>
+        {notifications.map((item, idx) => (
+          <Notification {...item} key={idx} />
+        ))}
+      </AnimatedList>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background"></div>
+    </div>
+  );
+}
+
+``` 
