@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion, MotionProps } from "motion/react";
+import { motion } from "motion/react"; // Removed MotionProps
 import * as React from "react";
 import {
   useEffect,
@@ -120,7 +120,8 @@ export function TypingAnimation<C extends RefTargetableMotionComponent = typeof 
     <MotionComponentToRender
       ref={elementRef} // Now correctly typed, no 'as any' needed
       className={cn(className)}
-      {...motionProps as any} // Cast to any for diagnostic purposes
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {...motionProps as any} // Cast to any, acknowledging type complexity
     >
       {displayedText}
       {/* Invisible text for layout calculation - helps prevent layout shifts as text types out */}
