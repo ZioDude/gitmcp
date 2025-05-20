@@ -14,8 +14,8 @@ import {
 // Define a type for components that can receive a ref and are valid for React.ElementRef
 type RefTargetableComponent =
   | keyof JSX.IntrinsicElements
-  | ComponentClass<any>
-  | ForwardRefExoticComponent<any>;
+  | ComponentClass<object>
+  | ForwardRefExoticComponent<object>;
 
 // Props specific to TypingAnimation's functionality
 interface TypingAnimationOwnProps<C extends RefTargetableComponent = "div"> {
