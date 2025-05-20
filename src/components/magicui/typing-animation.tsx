@@ -7,11 +7,18 @@ import {
   useRef,
   useState,
   ReactElement,
-  ElementType,
+  ComponentClass,
+  ForwardRefExoticComponent,
 } from "react";
 
+// Define a type for components that can receive a ref and are valid for React.ElementRef
+type RefTargetableComponent =
+  | keyof JSX.IntrinsicElements
+  | ComponentClass<any>
+  | ForwardRefExoticComponent<any>;
+
 // Props specific to TypingAnimation's functionality
-interface TypingAnimationOwnProps<C extends ElementType = "div"> {
+interface TypingAnimationOwnProps<C extends RefTargetableComponent = "div"> {
   text: string;
   className?: string;
   duration?: number;
@@ -24,10 +31,10 @@ interface TypingAnimationOwnProps<C extends ElementType = "div"> {
 type MotionSpreadProps = Omit<MotionProps, "children" | "as" | "ref">;
 
 // Combined props for the TypingAnimation component
-type TypingAnimationProps<C extends ElementType = "div"> =
+type TypingAnimationProps<C extends RefTargetableComponent = "div"> =
   TypingAnimationOwnProps<C> & MotionSpreadProps;
 
-export function TypingAnimation<C extends ElementType = "div">({ // C defaults to "div"
+export function TypingAnimation<C extends RefTargetableComponent = "div">({ // C defaults to "div"
   text,
   className,
   duration = 50,
