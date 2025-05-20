@@ -10,29 +10,30 @@ import {
 } from "react";
 
 // Define a type for components that can receive a ref and are valid for React.ElementRef
-type RefTargetableComponent =
-  | keyof JSX.IntrinsicElements
+// This version excludes JSX.IntrinsicElements to avoid namespace issues.
+type RefTargetableMotionComponent =
   | React.ComponentClass<object>
-  | React.ForwardRefExoticComponent<object>;
+  | React.ForwardRefExoticComponent<object>
+  | (typeof motion.div); // Explicitly include motion.div or similar as a base
 
 // Props specific to TypingAnimation's functionality
-interface TypingAnimationOwnProps<C extends RefTargetableComponent = "div"> {
+interface TypingAnimationOwnProps<C extends RefTargetableMotionComponent = typeof motion.div> {
   text: string;
   className?: string;
   duration?: number;
   delay?: number;
-  as?: C; // The component to render as, e.g., "div", "p"
+  as?: C; // The component to render as, e.g., motion.div, motion.p
   startOnView?: boolean;
 }
 
 // Props to be spread to the underlying motion component, excluding those handled by TypingAnimation
-type MotionSpreadProps = Omit<MotionProps, "children" | "as" | "ref">;
+type MotionSpreadProps<C extends RefTargetableMotionComponent> = Omit<React.ComponentPropsWithoutRef<C>, "children" | "as">;
 
 // Combined props for the TypingAnimation component
-type TypingAnimationProps<C extends RefTargetableComponent = "div"> =
-  TypingAnimationOwnProps<C> & MotionSpreadProps;
+type TypingAnimationProps<C extends RefTargetableMotionComponent = typeof motion.div> =
+  TypingAnimationOwnProps<C> & MotionSpreadProps<C>;
 
-export function TypingAnimation<C extends RefTargetableComponent = "div">({ // C defaults to "div"
+export function TypingAnimation<C extends RefTargetableMotionComponent = typeof motion.div>({ // C defaults to motion.div
   text,
   className,
   duration = 50,
@@ -44,11 +45,10 @@ export function TypingAnimation<C extends RefTargetableComponent = "div">({ // C
   const [displayedText, setDisplayedText] = useState<string>("");
   const [started, setStarted] = useState(!startOnView);
 
-  // Determine the actual component type to use. Default to "div".
-  // Type assertion ensures ActualAsComponent is compatible with C.
-  const ActualAsComponent = (as || "div") as C;
+  // Determine the actual component type to use. Default to motion.div.
+  const ActualAsComponent = (as || motion.div) as C;
 
-  // Ref type is React.ElementRef<C>, e.g., RefObject<HTMLDivElement> if C is "div"
+  // Ref type is React.ElementRef<C>
   const elementRef = useRef<React.ElementRef<C>>(null);
 
   useEffect(() => {
@@ -113,22 +113,19 @@ export function TypingAnimation<C extends RefTargetableComponent = "div">({ // C
 
   // Dynamically select the motion component based on AsComponent
   // Fallback to motion.div if AsComponent is not a string or a recognized HTML tag string
-  const MotionAsComponent =
-    typeof ActualAsComponent === "string" &&
-    Object.prototype.hasOwnProperty.call(motion, ActualAsComponent)
-      ? motion[ActualAsComponent as keyof typeof motion]
-      : motion.div; // Fallback to motion.div
+  // ActualAsComponent is now the motion component itself.
+  const MotionComponentToRender = ActualAsComponent;
 
   return (
-    <MotionAsComponent
+    <MotionComponentToRender
       ref={elementRef} // Now correctly typed, no 'as any' needed
       className={cn(className)}
-      {...motionProps} // Spread the filtered MotionProps
+      {...motionProps as any} // Cast to any for diagnostic purposes
     >
       {displayedText}
       {/* Invisible text for layout calculation - helps prevent layout shifts as text types out */}
       <span style={{ visibility: 'hidden', position: 'absolute', top: '-9999px', left: '-9999px' }}>{text}</span>
-    </MotionAsComponent>
+    </MotionComponentToRender>
   );
 }
 
